@@ -1,0 +1,9 @@
+[submodule "include/range-v3"]
+	path = include/range-v3
+	url = https://github.com/ericniebler/range-v3.git
+[submodule "include/fmt"]
+	path = include/fmt
+	url = https://github.com/fmtlib/fmt.git
+[submodule "include/catch"]
+	path = include/catch
+	url = https://github.com/philsquared/Catch.git
