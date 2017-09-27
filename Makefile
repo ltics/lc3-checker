@@ -2,7 +2,7 @@ CC=c++
 FLAG=-Wall -std=c++14 -I./include/range-v3/include -I./include/catch/single_include -I./include/fmt
 MAIN=main
 TEST=test
-OBJS=type.o main.o
+OBJS=type.o checker.o main.o
 
 .PHONY: test clean all
 
@@ -12,6 +12,9 @@ all: $(OBJS) main
 
 type.o:
 	$(CC) $(FLAG) -c ./src/type.hpp
+
+checker.o:
+	$(CC) $(FLAG) -c ./src/checker.hpp
 
 main.o: type.o
 	$(CC) $(FLAG) -c ./src/main.cc
