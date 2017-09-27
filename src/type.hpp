@@ -48,4 +48,44 @@ namespace type {
   auto IntegerType = make_shared<TypeOperator>("int", vector<shared_ptr<TypeOperator>>({}));
   auto BooleanType = make_shared<TypeOperator>("bool", vector<shared_ptr<TypeOperator>>({}));
   auto StringType = make_shared<TypeOperator>("string", vector<shared_ptr<TypeOperator>>({}));
+
+  class TypeVariable {
+  private:
+    int id;
+    char name;
+    static int next_id;
+    static char next_name;
+    shared_ptr<TypeOperator> instance;
+
+  public:
+    TypeVariable() {
+      this->id = TypeVariable::next_id;
+      TypeVariable::next_id += 1;
+      this->instance = nullptr;
+      this->name = ' ';
+    }
+
+    string to_name() {
+      if (this->name == ' ') {
+        this->name = next_name;
+        TypeVariable::next_name = (char)((int)TypeVariable::next_name + 1);
+      }
+      return format("{}", this->name);
+    }
+
+    string to_string() {
+      if (this->instance != nullptr) {
+        return this->instance->to_string();
+      } else {
+        return this->to_name();
+      }
+    }
+
+    string to_repr() {
+      return format("TypeVariable(id = {})", this->id);
+    }
+  };
+
+  int TypeVariable::next_id = 0;
+  char TypeVariable::next_name = 'a';
 }
