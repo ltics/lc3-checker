@@ -27,4 +27,60 @@ namespace ast {
       return format("(λ{0}. {1})", param, body->to_string());
     }
   };
+
+  class Identifier : public Node {
+  public:
+    string name;
+
+    Identifier(string n): name(n) {};
+
+    string to_string() {
+      return this->name;
+    }
+  };
+
+  class Apply : public Node {
+  public:
+    shared_ptr<Node> func;
+    shared_ptr<Node> arg;
+
+    Apply(f, a): func(f), arg(a) {};
+
+    string to_string() {
+      return format("({0} {1})", func->to_string(), arg->to_string());
+    }
+  };
+
+  // let ... in ...
+  class Let : public Node {
+  public:
+    string name;
+    shared_ptr<Node> func;
+    shared_ptr<Node> body;
+
+    Let(string name,
+        shared_ptr<Node> func,
+        shared_ptr<Node> body)
+      : name(name), func(func), body(body) {};
+
+    string to_string() {
+      return format("(let {0} = {1} in {2})", name, func->to_string(), body->to_string());
+    }
+  };
+
+  class Letrec : public Node {
+  public:
+    string name;
+    shared_ptr<Node> func;
+    shared_ptr<Node> body;
+
+    Letrec(string name,
+        shared_ptr<Node> func,
+        shared_ptr<Node> body)
+      : name(name), func(func), body(body) {};
+
+    string to_string() {
+      return format("(letrec {0} = {1} in {2})", name, func->to_string(), body->to_string());
+    }
+  };
 }
