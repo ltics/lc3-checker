@@ -13,7 +13,18 @@ using namespace fmt;
 using namespace ranges;
 
 namespace type {
-  class TypeOperator {
+  // OK, in Haskell, we call it kind, the type of a type, hmm... not really...
+  enum class TypeType : size_t {
+    OPERATOR,
+    VARIABLE
+  };
+
+  class Type {
+  public:
+    virtual TypeType type() = 0;
+  };
+
+  class TypeOperator : public Type {
   private:
     string name;
     vector<shared_ptr<TypeOperator>> types;
@@ -21,6 +32,10 @@ namespace type {
     TypeOperator(string name,
                  vector<shared_ptr<TypeOperator>> types)
       : name(name), types(types) {};
+
+    TypeType type() {
+      return TypeType::OPERATOR;
+    }
 
     virtual string to_string() {
       if (this->types.size() == 0) {
@@ -49,7 +64,7 @@ namespace type {
   auto BooleanType = make_shared<TypeOperator>("bool", vector<shared_ptr<TypeOperator>>({}));
   auto StringType = make_shared<TypeOperator>("string", vector<shared_ptr<TypeOperator>>({}));
 
-  class TypeVariable {
+  class TypeVariable : public Type {
   private:
     int id;
     char name;
@@ -63,6 +78,10 @@ namespace type {
       TypeVariable::next_id += 1;
       this->instance = nullptr;
       this->name = ' ';
+    }
+
+    TypeType type() {
+      return TypeType::VARIABLE;
     }
 
     string to_name() {
