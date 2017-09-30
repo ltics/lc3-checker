@@ -79,40 +79,40 @@ namespace ast {
   class Let : public Node {
   public:
     string name;
-    shared_ptr<Node> func;
+    shared_ptr<Node> defn;
     shared_ptr<Node> body;
 
     Let(string name,
-        shared_ptr<Node> func,
+        shared_ptr<Node> defn,
         shared_ptr<Node> body)
-      : name(name), func(func), body(body) {};
+      : name(name), defn(defn), body(body) {};
 
     NodeType type() {
       return NodeType::LET;
     }
 
     string to_string() {
-      return format("(let {0} = {1} in {2})", name, func->to_string(), body->to_string());
+      return format("(let {0} = {1} in {2})", name, defn->to_string(), body->to_string());
     }
   };
 
   class Letrec : public Node {
   public:
     string name;
-    shared_ptr<Node> func;
+    shared_ptr<Node> defn;
     shared_ptr<Node> body;
 
     Letrec(string name,
-        shared_ptr<Node> func,
+        shared_ptr<Node> defn,
         shared_ptr<Node> body)
-      : name(name), func(func), body(body) {};
+      : name(name), defn(defn), body(body) {};
 
     NodeType type() {
       return NodeType::LETREC;
     }
 
     string to_string() {
-      return format("(letrec {0} = {1} in {2})", name, func->to_string(), body->to_string());
+      return format("(letrec {0} = {1} in {2})", name, defn->to_string(), body->to_string());
     }
   };
 }

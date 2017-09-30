@@ -22,7 +22,7 @@ using namespace ranges;
 namespace checker {
   typedef map<string, shared_ptr<Type>> environment;
   typedef map<shared_ptr<Type>, shared_ptr<Type>> typevar_mapping;
-  typedef set<Type> typevars;
+  typedef set<shared_ptr<Type>> typevars;
 
   template<typename Base, typename T>
   inline bool instanceof(const shared_ptr<T> ptr) {
@@ -143,7 +143,48 @@ namespace checker {
   }
 
   auto analyse(shared_ptr<Node> node, environment env, typevars non_generic) -> shared_ptr<Type> {
-    return nullptr;
+    switch (node->type()) {
+    case NodeType::IDENTIFIER:
+      return get_type(static_pointer_cast<Identifier>(node)->name, env, non_generic);
+    case NodeType::APPLY: {
+      auto func_node = static_pointer_cast<Apply>(node);
+      auto func_type = analyse(func_node->func, env, non_generic);
+      auto arg_type = analyse(func_node->arg, env, non_generic);
+      auto return_type = make_shared<TypeVariable>();
+      unify(FunctionType(arg_type, return_type), func_type);
+      return return_type;
+    }
+    case NodeType::LAMBDA: {
+      auto lambda_node = static_pointer_cast<Lambda>(node);
+      auto param_type = make_shared<TypeVariable>();
+      environment new_env = env;
+      typevars new_non_generic = non_generic;
+      new_env[lambda_node->param] = param_type;
+      new_non_generic.insert(param_type);
+      auto return_type = analyse(lambda_node->body, new_env, new_non_generic);
+      return FunctionType(param_type, return_type);
+    }
+    case NodeType::LET: {
+      auto let_node = static_pointer_cast<Let>(node);
+      auto defn_type = analyse(let_node->defn, env, non_generic);
+      environment new_env = env;
+      new_env[let_node->name] = defn_type;
+      return analyse(let_node->body, new_env, non_generic);
+    }
+    case NodeType::LETREC: {
+      auto letrec_node = static_pointer_cast<Letrec>(node);
+      auto new_type = make_shared<TypeVariable>();
+      environment new_env = env;
+      typevars new_non_generic = non_generic;
+      new_env[letrec_node->name] = new_type;
+      new_non_generic.insert(new_type);
+      auto defn_type = analyse(letrec_node->defn, new_env, new_non_generic);
+      unify(new_type, defn_type);
+      return analyse(letrec_node->body, new_env, non_generic);
+    }
+    default:
+      throw runtime_error(format("Unhandled syntax node {}", node->to_string()));
+    }
   }
 
   auto analyse(shared_ptr<Node> node, environment env) -> shared_ptr<Type> {
