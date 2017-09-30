@@ -107,7 +107,46 @@ namespace checker {
     if (result != env.end()) {
       return fresh(env[name], non_generic);
     } else {
-      throw std::runtime_error(format("Undefined symbol {}", name));
+      throw runtime_error(format("Undefined symbol {}", name));
     }
+  }
+
+  auto unify(shared_ptr<Type> t1, shared_ptr<Type> t2) -> void {
+    auto pruned1 = prune(t1);
+    auto pruned2 = prune(t2);
+
+    if (pruned1->type() == TypeType::VARIABLE) {
+      if (pruned1 != pruned2) {
+        if (occurs_in_type(pruned1, pruned2)) {
+          throw runtime_error("Recursive unification");
+        }
+        static_pointer_cast<TypeVariable>(pruned1)->instance = pruned2;
+      }
+    } else if (pruned1->type() == TypeType::OPERATOR && pruned2->type() == TypeType::VARIABLE) {
+      unify(pruned2, pruned1);
+    } else if (pruned1->type() == TypeType::OPERATOR && pruned2->type() == TypeType::OPERATOR) {
+      auto oper1 = static_pointer_cast<TypeOperator>(pruned1);
+      auto oper2 = static_pointer_cast<TypeOperator>(pruned2);
+      if (oper1->name != oper2->name || oper1->types.size() != oper2->types.size()) {
+        throw runtime_error(format("Type mismatch: {0} != {1}", pruned1->to_string(), pruned2->to_string()));
+      }
+      auto types1 = oper1->types;
+      auto types2 = oper2->types;
+      for (auto entry1 = types1.begin(), entry2 = types2.begin();
+           entry1 != types1.end();
+           ++entry1 , ++entry2) {
+        unify(*entry1, *entry2);
+      }
+    } else {
+      throw runtime_error(format("Can not unify: {0}, {1}", pruned1->to_string(), pruned2->to_string()));
+    }
+  }
+
+  auto analyse(shared_ptr<Node> node, environment env, typevars non_generic) -> shared_ptr<Type> {
+    return nullptr;
+  }
+
+  auto analyse(shared_ptr<Node> node, environment env) -> shared_ptr<Type> {
+    return analyse(node, env, typevars({}));
   }
 }
