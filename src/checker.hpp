@@ -1,3 +1,5 @@
+#pragma once
+
 #include <set>
 #include <map>
 #include <string>
@@ -81,7 +83,7 @@ namespace checker {
       if (pruned->type() == TypeType::VARIABLE) {
         if (is_generic(pruned, non_generic)) {
           auto result = mapping.find(pruned);
-          if (result != mapping.end()) {
+          if (result == mapping.end()) {
             mapping[pruned] = make_shared<TypeVariable>();
           }
           return mapping[pruned];

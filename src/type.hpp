@@ -1,3 +1,5 @@
+#pragma once
+
 #include <string>
 #include <vector>
 #include <memory>
@@ -85,27 +87,28 @@ namespace type {
       if (this->types.size() == 0) {
         return this->name;
       } else if (this->types.size() == 2) {
-        return format("{0} {1} {2}", this->types[0]->to_string(), this->name, this->types[2]->to_string());
+        return format("{0} {1} {2}", this->types[0]->to_string(), this->name, this->types[1]->to_string());
       } else {
-        auto literal = this->types
-          | view::transform([](shared_ptr<Type> t) -> string {
+        vector<string> literals = this->types | view::transform([](shared_ptr<Type> t) -> string {
             return t->to_string();
-          })
-          | view::join(' ');
+          });
+        string literal = literals | view::join(' ');
         return format("{0} {1}", this->name, literal);
       }
     }
   };
 
-  auto IntegerType = make_shared<TypeOperator>("int", vector<shared_ptr<TypeOperator>>({}));
-  auto BooleanType = make_shared<TypeOperator>("bool", vector<shared_ptr<TypeOperator>>({}));
-  auto StringType = make_shared<TypeOperator>("string", vector<shared_ptr<TypeOperator>>({}));
-  auto FunctionType(shared_ptr<Type> from_type, shared_ptr<Type> to_type) -> shared_ptr<TypeOperator> {
+  auto IntegerType = make_shared<TypeOperator>("int", vector<shared_ptr<Type>>({}));
+  auto BooleanType = make_shared<TypeOperator>("bool", vector<shared_ptr<Type>>({}));
+  auto StringType = make_shared<TypeOperator>("string", vector<shared_ptr<Type>>({}));
+  auto FunctionType(shared_ptr<Type> from_type, shared_ptr<Type> to_type) -> shared_ptr<Type> {
     return make_shared<TypeOperator>("->", vector<shared_ptr<Type>>({ from_type, to_type }));
   }
 
   bool operator==(shared_ptr<Type> t1, shared_ptr<Type> t2) {
-    if (t1->type() != t2->type()) {
+    if (t1 == nullptr && t2 == nullptr) {
+      return true;
+    } else if (t1 == nullptr || t2 == nullptr || t1->type() != t2->type()) {
       return false;
     } else {
       if (t1->type() == TypeType::VARIABLE) {

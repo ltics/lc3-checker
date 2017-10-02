@@ -1,3 +1,5 @@
+#pragma once
+
 #include <string>
 #ifndef FORMAT_HEADER
 #define FORMAT_HEADER
