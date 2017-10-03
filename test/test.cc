@@ -1,29 +1,26 @@
-#include <string>
-#include <iostream>
-#include "type.hpp"
-#include "checker.hpp"
+#define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
+#include "catch.hpp"
+#include "../src/ast.hpp"
+#include "../src/type.hpp"
+#include "../src/checker.hpp"
+#include <vector>
 
 using namespace std;
 using namespace ast;
 using namespace type;
 using namespace checker;
 
-auto try_analyse(shared_ptr<Node> expr, environment env) -> shared_ptr<Type> {
-  try {
-    return analyse(expr, env);
-  } catch (std::runtime_error &e) {
-    cout << expr->to_string() << " runtime error: " << e.what () << endl;
-    return nullptr;
-  }
-}
+TEST_CASE("basic type inference") {
+  struct GoodTestCase {
+    shared_ptr<Node> input;
+    shared_ptr<Type> expected;
+  };
 
-auto get_type(shared_ptr<Node> expr, environment env) -> void {
-  auto type = try_analyse(expr, env);
-  if (type != nullptr)
-    cout << expr->to_string() << " type: " << type->to_string() << endl;
-}
+  struct BadTestCase {
+    shared_ptr<Node> input;
+    string error_msg;
+  };
 
-int main(int argc, char** argv) {
   auto var1 = make_shared<TypeVariable>();
   auto var2 = make_shared<TypeVariable>();
   auto var3 = make_shared<TypeVariable>();
@@ -90,13 +87,37 @@ int main(int argc, char** argv) {
                                                                                                      make_shared<Apply>(make_shared<Identifier>("g"),
                                                                                                                         make_shared<Identifier>("arg"))))));
 
-  get_type(recursion_expr, env);
-  get_type(let_poly_expr, env);
-  get_type(fail_expr, env);
-  get_type(pair_expr, env);
-  get_type(infinite_expr, env);
-  get_type(lazy_expr, env);
-  get_type(compose_expr, env);
+  auto compose_type = FunctionType(FunctionType(var1, var2), FunctionType(FunctionType(var3, var1), FunctionType(var3, var2)));
 
-  return 0;
+  vector<GoodTestCase> good_tests = {
+    { recursion_expr, IntegerType },
+    { let_poly_expr, make_shared<TypeOperator>("*", vector<shared_ptr<Type>>({ IntegerType, BooleanType })) },
+    { lazy_expr, IntegerType },
+    { compose_expr, compose_type }
+  };
+
+  vector<BadTestCase> bad_tests = {
+    { fail_expr, "Type mismatch: bool != int" },
+    { pair_expr, "Undefined symbol f" },
+    { infinite_expr, "Recursive unification" }
+  };
+
+  std::for_each(good_tests.cbegin(), good_tests.cend(), [=](const GoodTestCase &c) {
+      auto type = analyse(c.input, env);
+      REQUIRE(type->to_string() == c.expected->to_string());
+    });
+
+  auto get_error_msg = [](shared_ptr<Node> expr, environment env) -> string {
+    try {
+      analyse(expr, env);
+      return "";
+    } catch (std::runtime_error &e) {
+      return e.what();
+    }
+  };
+
+  std::for_each(bad_tests.cbegin(), bad_tests.cend(), [=](const BadTestCase &c) {
+      auto msg = get_error_msg(c.input, env);
+      REQUIRE(msg == c.error_msg);
+    });
 }

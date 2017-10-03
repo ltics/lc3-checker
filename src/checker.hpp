@@ -48,7 +48,6 @@ namespace checker {
     }
   }
 
-
   auto occurs_in_type(shared_ptr<Type> var, shared_ptr<Type> t) -> bool;
 
   auto occurs_in(shared_ptr<Type> var, vector<shared_ptr<Type>> types) -> bool {

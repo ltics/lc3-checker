@@ -8,7 +8,7 @@ OBJS=type.o ast.o checker.o main.o
 
 build: $(OBJS)
 
-all: $(OBJS) main
+all: $(OBJS) test main
 
 type.o:
 	$(CC) $(FLAG) -c ./src/type.hpp
@@ -23,7 +23,10 @@ main.o: type.o
 	$(CC) $(FLAG) -c ./src/main.cc
 
 main: main.o
-	$(CC) $(FLAG) -ledit main.o -o $(MAIN)
+	$(CC) $(FLAG) main.o -o $(MAIN)
+
+test:
+	$(CC) $(FLAG) ./test/test.cc && ./a.out
 
 clean:
 	rm *.o *.out $(MAIN)
