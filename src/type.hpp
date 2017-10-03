@@ -87,13 +87,13 @@ namespace type {
       if (this->types.size() == 0) {
         return this->name;
       } else if (this->types.size() == 2) {
-        return format("{0} {1} {2}", this->types[0]->to_string(), this->name, this->types[1]->to_string());
+        return format("({0} {1} {2})", this->types[0]->to_string(), this->name, this->types[1]->to_string());
       } else {
         vector<string> literals = this->types | view::transform([](shared_ptr<Type> t) -> string {
             return t->to_string();
           });
         string literal = literals | view::join(' ');
-        return format("{0} {1}", this->name, literal);
+        return format("({0} {1})", this->name, literal);
       }
     }
   };

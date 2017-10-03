@@ -94,6 +94,8 @@ int main(int argc, char** argv) {
                                                                                                      make_shared<Apply>(make_shared<Identifier>("g"),
                                                                                                                         make_shared<Identifier>("arg"))))));
 
+  cout << compose_expr->to_string() << endl;
+
   get_type(recursion_expr, env);
   get_type(let_poly_expr, env);
   get_type(fail_expr, env);
