@@ -30,16 +30,17 @@ namespace type {
   class TypeVariable : public Type {
   public:
     int id;
-    char name;
-    static int next_id;
-    static char next_name;
     shared_ptr<Type> instance;
 
+    static int next_id;
+
     TypeVariable() {
+      if (TypeVariable::next_id == 25) {
+        TypeVariable::next_id = 0;
+      }
       this->id = TypeVariable::next_id;
       TypeVariable::next_id += 1;
       this->instance = nullptr;
-      this->name = ' ';
     }
 
     TypeType type() {
@@ -47,11 +48,7 @@ namespace type {
     }
 
     string to_name() {
-      if (this->name == ' ') {
-        this->name = next_name;
-        TypeVariable::next_name = (char)((int)TypeVariable::next_name + 1);
-      }
-      return format("{}", this->name);
+      return format("{}", (char)(this->id + 97));
     }
 
     string to_string() {
@@ -68,7 +65,6 @@ namespace type {
   };
 
   int TypeVariable::next_id = 0;
-  char TypeVariable::next_name = 'a';
 
   class TypeOperator : public Type {
   public:
@@ -117,7 +113,6 @@ namespace type {
 
         return
           var1->id == var2->id &&
-          var1->name == var2->name &&
           var1->instance == var2->instance;
       } else if (t1->type() == TypeType::OPERATOR) {
         auto oper1 = static_pointer_cast<TypeOperator>(t1);
