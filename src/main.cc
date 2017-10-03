@@ -31,9 +31,6 @@ int main(int argc, char** argv) {
 
   auto pair_type = make_shared<TypeOperator>("*", vector<shared_ptr<Type>>({ var1, var2 }));
   environment env = {
-    { "1", IntegerType },
-    { "3", IntegerType },
-    { "5", IntegerType },
     { "true", BooleanType },
     { "pair", FunctionType(var1, FunctionType(var2, pair_type)) },
     { "cond", FunctionType(BooleanType, FunctionType(var3, FunctionType(var3, var3))) },

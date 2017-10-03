@@ -2,6 +2,7 @@
 
 #include <set>
 #include <map>
+#include <regex>
 #include <string>
 #include <vector>
 #include <memory>
@@ -25,6 +26,7 @@ namespace checker {
   typedef map<string, shared_ptr<Type>> environment;
   typedef map<shared_ptr<Type>, shared_ptr<Type>> typevar_mapping;
   typedef set<shared_ptr<Type>> typevars;
+  regex digits_regex("^(\\d+)$");
 
   template<typename Base, typename T>
   inline bool instanceof(const shared_ptr<T> ptr) {
@@ -108,6 +110,8 @@ namespace checker {
     auto result = env.find(name);
     if (result != env.end()) {
       return fresh(env[name], non_generic);
+    } else if (regex_match(name, digits_regex)) {
+      return IntegerType;
     } else {
       throw runtime_error(format("Undefined symbol {}", name));
     }
