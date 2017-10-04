@@ -1,7 +1,7 @@
 CC=c++
 FLAG=-Wall -std=c++14 -I./include/range-v3/include -I./include/catch/single_include -I./include/fmt
 MAIN=main
-TEST=test
+TEST=test-exec
 OBJS=type.o ast.o checker.o main.o
 
 .PHONY: test clean all
@@ -26,7 +26,7 @@ main: main.o
 	$(CC) $(FLAG) main.o -o $(MAIN)
 
 test:
-	$(CC) $(FLAG) ./test/test.cc && ./a.out
+	$(CC) $(FLAG) ./test/test.cc -o $(TEST) && ./$(TEST)
 
 clean:
-	rm *.o *.out $(MAIN)
+	rm *.o $(MAIN) $(TEST)
