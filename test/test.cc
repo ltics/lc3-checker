@@ -87,7 +87,7 @@ TEST_CASE("basic type inference") {
                                                                                                      make_shared<Apply>(make_shared<Identifier>("g"),
                                                                                                                         make_shared<Identifier>("arg"))))));
 
-  auto compose_type = FunctionType(FunctionType(var1, var2), FunctionType(FunctionType(var3, var1), FunctionType(var3, var2)));
+  auto compose_type = FunctionType(FunctionType(var2, var3), FunctionType(FunctionType(var1, var2), FunctionType(var1, var3)));
 
   vector<GoodTestCase> good_tests = {
     { recursion_expr, IntegerType },
@@ -103,7 +103,7 @@ TEST_CASE("basic type inference") {
   };
 
   std::for_each(good_tests.cbegin(), good_tests.cend(), [=](const GoodTestCase &c) {
-      auto type = analyse(c.input, env);
+      auto type = normalize(analyse(c.input, env));
       REQUIRE(type->to_string() == c.expected->to_string());
     });
 

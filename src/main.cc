@@ -19,8 +19,10 @@ auto try_analyse(shared_ptr<Node> expr, environment env) -> shared_ptr<Type> {
 
 auto get_type(shared_ptr<Node> expr, environment env) -> void {
   auto type = try_analyse(expr, env);
-  if (type != nullptr)
-    cout << expr->to_string() << " type: " << type->to_string() << endl;
+  if (type != nullptr) {
+    cout << expr->to_string() << " type: " << type->to_string();
+    cout << " normalize: " << normalize(type)->to_string() << endl;
+  }
 }
 
 int main(int argc, char** argv) {

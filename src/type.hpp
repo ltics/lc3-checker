@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <algorithm>
 #include <range/v3/all.hpp>
 #ifndef FORMAT_HEADER
 #define FORMAT_HEADER
@@ -124,6 +125,68 @@ namespace type {
       } else {
         return false;
       }
+    }
+  }
+
+  auto get_var_ids(shared_ptr<Type> t) -> vector<int> {
+    switch (t->type()) {
+    case TypeType::VARIABLE: {
+      auto var = static_pointer_cast<TypeVariable>(t);
+      if (var->instance == nullptr) {
+        return vector<int>({ var->id });
+      } else {
+        return get_var_ids(var->instance);
+      }
+    }
+    case TypeType::OPERATOR: {
+      auto oper = static_pointer_cast<TypeOperator>(t);
+      vector<int> ids = oper->types
+        | view::transform(get_var_ids)
+        | action::join;
+
+      return ids;
+    }
+    default:
+      return vector<int>({});
+    }
+  }
+
+  auto minus_base(shared_ptr<Type> t, int base) -> shared_ptr<Type> {
+    switch (t->type()) {
+    case TypeType::VARIABLE: {
+      auto var = static_pointer_cast<TypeVariable>(t);
+      if (var->instance == nullptr) {
+        if (var->id >= base) {
+          var->id -= base;
+        }
+      } else {
+        auto new_instance = minus_base(var->instance, base);
+        var->instance = new_instance;
+      }
+      return var;
+    }
+    case TypeType::OPERATOR: {
+      auto oper = static_pointer_cast<TypeOperator>(t);
+      auto new_types = oper->types
+        | view::transform([=](shared_ptr<Type> tt) {
+            return minus_base(tt, base);
+          });
+          oper->types = new_types;
+      return oper;
+    }
+    default:
+      return t;
+    }
+  }
+
+  auto normalize(shared_ptr<Type> t) -> shared_ptr<Type> {
+    auto ids = get_var_ids(t);
+    auto min_iter = std::min_element(ids.cbegin(), ids.cend());
+    if (min_iter != ids.end()) {
+      auto min_id = *min_iter;
+      return minus_base(t, min_id);
+    } else {
+      return t;
     }
   }
 }
