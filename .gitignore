@@ -31,5 +31,6 @@
 *.exe
 *.out
 *.app
-main
-test-exec
+
+# CMake
+build/

@@ -17,4 +17,4 @@ script:
   - c++ --version
   - git submodule update --init --recursive
   - git submodule foreach git pull origin master
-  - make test
+  - ./build.sh
