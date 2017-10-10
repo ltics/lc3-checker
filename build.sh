@@ -7,8 +7,6 @@ mkdir build && cd build
 cmake ..
 make
 make test
-if [ ! -f "main" ]
-then
-    echo "File main does not exist"
+if [ $? != 0 ] || [ ! -f "main" ] ; then
     exit 1
 fi
